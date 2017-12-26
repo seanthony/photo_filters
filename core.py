@@ -45,7 +45,7 @@ class FilterPhoto:
             row = i // (size * w)
             col = (i % size) // w
             x = row * blocks + col
-            return min(x, 255)
+            return x
 
         # load image into memory
         image = self.image
