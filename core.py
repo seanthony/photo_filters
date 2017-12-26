@@ -73,7 +73,7 @@ class FilterPhoto:
             row = i // (size * d)
             col = (i % size) // d
             x = row * circles + col
-            return min(x, 255)
+            return x
 
         # load image into memory
         image = self.image
