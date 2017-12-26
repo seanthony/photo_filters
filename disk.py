@@ -15,4 +15,4 @@ def open(filename):
 
 
 def is_file(filename):
-    return isfile(fname)
+    return isfile(filename)

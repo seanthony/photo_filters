@@ -1,4 +1,4 @@
-from core import FilterPhoto
+from core import FilterPhoto, is_file
 import os
 
 
@@ -21,26 +21,31 @@ def get_filename():
             'please enter the filename with path of the picture you are filtering: ').strip()
         if filename.lower() == 'q':
             sys_exit()
-        elif core.is_file(filename):
+        elif is_file(filename):
             return filename
         elif filename == '':
             return 'moto.jpg'
         else:
             clear_screen()
             print(
-                "no file with filename '{}' found. please try again.\n".format(filename))
+                "oops! no file with filename '{}' found. please try again.\n".format(filename))
+
+
+def check_image_file(filename):
+    while True:
+        try:
+            return FilterPhoto(filename)
+        except OSError:
+            clear_screen()
+            print('uh-oh. looks like \'{}\' is not an image file.')
+            filename = get_filename()
 
 
 def main():
     clear_screen()
     print('hello world.\n\nwelcome to sean\'s photo editor.\nupload a picture of your choice and apply the filter of your choice.\nenter "q" to quit.\n')
     filename = get_filename()
-    try:
-        image = FilterPhoto(filename)
-    except FileNotFoundError:
-        clear_screen()
-        print(
-            "no file with filename '{}' found. please try again.\n".format(filename))
+    image = check_image_file(filename)
 
 
 if __name__ == '__main__':
