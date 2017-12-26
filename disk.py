@@ -18,6 +18,6 @@ def is_file(filename):
     return isfile(filename)
 
 
-def save_filtered(image_obj):
+def save_image(image_obj):
     fp = join('.', 'filtered_photos', image_obj.filename)
     image_obj.image.save(fp)

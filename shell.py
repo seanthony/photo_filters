@@ -66,8 +66,9 @@ def main():
     image = get_image_file(filename)
     filter_index = get_filter(image.filters)
     print('Filtering...')
-    image.filters[filter_index].get('filter')()
-    image.save_filtered()
+    image.image = image.filters[filter_index].get('filter')()
+    image.save()
+    image.image.show()
 
 
 if __name__ == '__main__':

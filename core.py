@@ -61,7 +61,7 @@ class FilterPhoto:
 
         image = Image.new('RGB', (size, size))
         image.putdata(list(data))
-        image.show()
+        return image
 
     def filter_circledots(self, size=1024, colors=16, circles=16, color=(255, 255, 255)):
         # image properties
@@ -100,13 +100,13 @@ class FilterPhoto:
 
         image = Image.new('RGB', (size, size))
         image.putdata(list(data))
-        image.show()
+        return image
 
     def no_filter(self, size=1024):
         image = self.image
         image = resizeimage.resize_cover(
             image, [size, size], validate=False).convert('RGB')
-        image.show()
+        return image
 
-    def save_filtered(self):
-        disk.save_filtered(self)
+    def save(self):
+        disk.save_image(self)
