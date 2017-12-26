@@ -4,9 +4,8 @@ from PIL import Image, ImageFilter
 from resizeimage import resizeimage
 
 
-def first_val(t):
-    a, b = t
-    return a
+def is_file(filename):
+    return disk.is_file(filename)
 
 
 class FilterPhoto:
