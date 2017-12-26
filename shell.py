@@ -18,6 +18,7 @@ def sys_exit():
 def main():
     clear_screen()
     print('hello world.\n\nwelcome to sean\'s photo editor.\nupload a picture of your choice and apply the filter of your choice.\nenter "q" to quit.\n')
+
     while True:
         filename = input(
             'please enter the filename with path of the picture you are filtering: ').strip()
@@ -26,9 +27,15 @@ def main():
         elif filename == '':
             image = FilterPhoto('moto.jpg')
             break
-        else:
+
+        try:
             image = FilterPhoto(filename)
             break
+        except FileNotFoundError:
+            clear_screen()
+            print(
+                "no file with filename '{}' found. please try again.\n".format(filename))
+            continue
 
 
 if __name__ == '__main__':
