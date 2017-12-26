@@ -14,8 +14,11 @@ class FilterPhoto:
         self.image = disk.open(filename)
         self.size = self.image.size
         self.colors = len(self.image.getcolors())
-        self.filters = [{'Square Blocks': self.filter_squareblocks},
-                        {'Circle Dots': self.filter_circledots}]
+        self.filters = [
+            {'name': 'No Filters', 'filter': self.no_filter},
+            {'name': 'Square Blocks', 'filter': self.filter_squareblocks},
+            {'name': 'Circle Dots', 'filter': self.filter_circledots}
+        ]
 
     def __str__(self):
         return "FilterPhoto Object\n  Filename: '{}'\n  Size: {}\n  Colors: {}".format(self.filename, self.size, self.colors)
@@ -91,4 +94,10 @@ class FilterPhoto:
 
         image = Image.new('RGB', (size, size))
         image.putdata(list(data))
+        image.show()
+
+    def no_filter(self, size=1024):
+        image = self.image
+        image = resizeimage.resize_cover(
+            image, [size, size], validate=False).convert('RGB')
         image.show()

@@ -31,21 +31,41 @@ def get_filename():
                 "oops! no file with filename '{}' found. please try again.\n".format(filename))
 
 
-def check_image_file(filename):
+def get_image_file(filename):
     while True:
         try:
-            return FilterPhoto(filename)
+            image = FilterPhoto(filename)
+            print("'{}' successfully loaded...\n\n".format(filename))
+            return image
         except OSError:
             clear_screen()
             print('uh-oh. looks like \'{}\' is not an image file.')
             filename = get_filename()
 
 
+def get_filter(filter_list):
+    num_filters = len(filter_list)
+    print('\n'.join(['{}. {}'.format(i, filter_list[i].get('name'))
+                     for i in range(1, num_filters)]))
+    while True:
+        choice = input(
+            '\nenter the number filter or choose \'0\' to apply no filter: ').strip().lower()
+        if choice == 'q':
+            sys_exit()
+        elif choice.isnumeric() and int(choice) in range(num_filters):
+            return int(choice)
+        else:
+            print('whoops. \'{}\' an invalid option.'.format(choice))
+            continue
+
+
 def main():
     clear_screen()
     print('hello world.\n\nwelcome to sean\'s photo editor.\nupload a picture of your choice and apply the filter of your choice.\nenter "q" to quit.\n')
     filename = get_filename()
-    image = check_image_file(filename)
+    image = get_image_file(filename)
+    filter_index = get_filter(image.filters)
+    image.filters[filter_index].get('filter')()
 
 
 if __name__ == '__main__':
