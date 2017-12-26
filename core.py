@@ -14,6 +14,8 @@ class FilterPhoto:
         self.image = disk.open(filename)
         self.size = self.image.size
         self.colors = len(self.image.getcolors())
+        self.filters = [{'Square Blocks': self.filter_squareblocks},
+                        {'Circle Dots': self.filter_circledots}]
 
     def __str__(self):
         return "FilterPhoto Object\n  Filename: '{}'\n  Size: {}\n  Colors: {}".format(self.filename, self.size, self.colors)
