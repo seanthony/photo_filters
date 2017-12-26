@@ -53,34 +53,41 @@ class FilterPhoto:
         image.putdata(list(data))
         image.show()
 
-    # def filter_circle_dots(self, size=1024, colors=16, circles=16, color=(255, 255, 255)):
-    #     # image properties
-    #     colors = min(256, colors)
-    #     size = size - (size % circles)
-    #     d = size // circles  # pixel diameter of individual circles
-    #     r, g, b = color
-    #     color = (min(255, r), min(255, g), min(255, b))
+    def filter_circledots(self, size=1024, colors=16, circles=16, color=(255, 255, 255)):
+        # image properties
+        colors = min(256, colors)
+        r, g, b = color
+        color = (min(255, r), min(255, g), min(255, b))
+        size = size - (size % circles)
+        d = size // circles  # pixel diameter of individual circles
+        r = d // 2
 
-    #     # helper functions
-    #     def is_color(i):
-    #         w = r - int(sqrt(r**2 - (i % px - r)**2))
-    #         return None
+        # helper functions
+        def is_color(i):
+            val = abs(r - (i % d))
+            x = (i // size) % d
+            y = int(sqrt(r**2 - (x - r)**2))
+            return val <= y
 
-    #     def color_index(i):
-    #         return i // size**2 * circles + i % circles
+        def color_index(i):
+            row = i // (size * d)
+            col = (i % size) // d
+            x = row * circles + col
+            return min(x, 255)
 
-    #     # load image into memory
-    #     image = self.image
-    #     image = image.filter(
-    #         ImageFilter.SMOOTH_MORE).quantize(colors).convert('RGB')
-    #     image = resizeimage.resize_cover(
-    #         image, [circles, circles], validate=False).convert('RGB')
-    #     image = image.quantize(colors).convert('RGB')
-    #     img_data = image.getdata()  # get image data
+        # load image into memory
+        image = self.image
+        image = image.filter(
+            ImageFilter.SMOOTH_MORE).quantize(colors).convert('RGB')
+        image = resizeimage.resize_cover(
+            image, [circles, circles], validate=False).convert('RGB')
+        image = image.quantize(colors).convert('RGB')
+        img_data = image.getdata()  # get image data
 
-    #     # generate pixel data for new image
-    #     data = map(lambda i: img_data[color_index(i)], range(size**2))
+        # generate pixel data for new image
+        data = map(lambda i: img_data[color_index(i)]
+                   if is_color(i) else color, range(size**2))
 
-    #     image = Image.new('RGB', (size, size))
-    #     image.putdata(list(data))
-    #     image.show()
+        image = Image.new('RGB', (size, size))
+        image.putdata(list(data))
+        image.show()
