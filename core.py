@@ -10,7 +10,7 @@ def is_file(filename):
 
 class FilterPhoto:
     def __init__(self, filename):
-        self.filename = filename.replace('.', '_filtered.')
+        self.filename = self.clean_filename(filename)
         self.image = disk.open(filename)
         self.size = self.image.size
         self.colors = len(self.image.getcolors())
@@ -25,6 +25,12 @@ class FilterPhoto:
 
     def __repr__(self):
         return "FilterPhoto(filename='{}',size={},colors={})".format(self.filename, self.size, self.colors)
+
+    def clean_filename(self, filename):
+        if '/' in filename:
+            filename = filename.split('/')[-1]
+        filename = filename.replace('.', '_filtered.')
+        return filename
 
     def filter_squareblocks(self, size=1024, colors=16, blocks=16, color=(255, 255, 255)):
         # image properties
@@ -101,3 +107,6 @@ class FilterPhoto:
         image = resizeimage.resize_cover(
             image, [size, size], validate=False).convert('RGB')
         image.show()
+
+    def save_filtered(self):
+        disk.save_filtered(self)

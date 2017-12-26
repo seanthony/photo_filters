@@ -1,6 +1,6 @@
 from PIL import Image
 from resizeimage import resizeimage
-from os.path import isfile
+from os.path import isfile, join
 
 
 def open(filename):
@@ -16,3 +16,8 @@ def open(filename):
 
 def is_file(filename):
     return isfile(filename)
+
+
+def save_filtered(image_obj):
+    fp = join('.', 'filtered_photos', image_obj.filename)
+    image_obj.image.save(fp)
