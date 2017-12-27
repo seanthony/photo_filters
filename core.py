@@ -1,6 +1,6 @@
 import disk
 from math import sqrt
-from PIL import Image, ImageFilter
+from PIL import Image, ImageFilter, ImageFont, ImageDraw
 from resizeimage import resizeimage
 
 
@@ -17,7 +17,9 @@ class FilterPhoto:
         self.filters = [
             {'name': 'No Filters', 'filter': self.no_filter},
             {'name': 'Square Blocks', 'filter': self.filter_squareblocks},
-            {'name': 'Circle Dots', 'filter': self.filter_circledots}
+            {'name': 'Circle Dots', 'filter': self.filter_circledots},
+            {'name': 'Black Out Text', 'filter': self.filter_lettertext},
+            {'name': 'Black Out Inverse', 'filter': self.filter_inversetext}
         ]
 
     def __str__(self):
@@ -100,6 +102,88 @@ class FilterPhoto:
 
         image = Image.new('RGB', (size, size))
         image.putdata(list(data))
+        return image
+
+    def filter_lettertext(self, text="Base Camp Coding Academy", fontsize=256, size=1024, colors=256, color=(255, 255, 255), padding=64):
+        # image properties
+        colors = min(256, colors)
+        r, g, b = color
+        color = (min(255, r), min(255, g), min(255, b))
+
+        # load image into memory
+        image = self.image
+        image = resizeimage.resize_cover(
+            image, [size, size, ], validate=False).convert('RGB')
+        image = image.quantize(colors).convert('RGB')
+        data = image.getdata()
+
+        # create text image
+        text_image = Image.new('RGB', (size, size))
+        text_image.putdata([color for _ in range(size**2)])
+        text_image = text_image.convert('RGB')
+
+        # draw on text_image
+        font = disk.get_font(fontsize)
+        draw = ImageDraw.Draw(text_image, mode='RGB')
+        c = 0
+        for word in text.split():
+            draw.text((padding // 2, padding + c), word +
+                      '_', font=font, fill=(0, 0, 0))
+            c += size // len(text.split())
+
+        # get data from text image
+        text_image = text_image.convert('RGB')
+        text_image = resizeimage.resize_cover(
+            text_image, [size, size, ], validate=False).convert('RGB')
+        text_data = text_image.getdata()
+
+        # make new data
+        new_data = [color if text_data[i] == color else data[i]
+                    for i in range(size**2)]
+
+        image = Image.new('RGB', (size, size))
+        image.putdata(new_data)
+        return image
+
+    def filter_inversetext(self, text="Base Camp Coding Academy", fontsize=256, size=1024, colors=256, color=(255, 255, 255), padding=64):
+        # image properties
+        colors = min(256, colors)
+        r, g, b = color
+        color = (min(255, r), min(255, g), min(255, b))
+
+        # load image into memory
+        image = self.image
+        image = resizeimage.resize_cover(
+            image, [size, size, ], validate=False).convert('RGB')
+        image = image.quantize(colors).convert('RGB')
+        data = image.getdata()
+
+        # create text image
+        text_image = Image.new('RGB', (size, size))
+        text_image.putdata([color for _ in range(size**2)])
+        text_image = text_image.convert('RGB')
+
+        # draw on text_image
+        font = disk.get_font(fontsize)
+        draw = ImageDraw.Draw(text_image, mode='RGB')
+        c = 0
+        for word in text.split():
+            draw.text((padding // 2, padding + c), word +
+                      '_', font=font, fill=(0, 0, 0))
+            c += size // len(text.split())
+
+        # get data from text image
+        text_image = text_image.convert('RGB')
+        text_image = resizeimage.resize_cover(
+            text_image, [size, size, ], validate=False).convert('RGB')
+        text_data = text_image.getdata()
+
+        # make new data
+        new_data = [color if text_data[i] != color else data[i]
+                    for i in range(size**2)]
+
+        image = Image.new('RGB', (size, size))
+        image.putdata(new_data)
         return image
 
     def no_filter(self, size=1024):
