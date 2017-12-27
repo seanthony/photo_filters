@@ -22,7 +22,8 @@ class FilterPhoto:
             {'name': 'Black Out Text', 'filter': self.filter_lettertext},
             {'name': 'Black Out Inverse', 'filter': self.filter_inversetext},
             {'name': 'Andy Warhol', 'filter': self.filter_warhol},
-            {'name': 'Color Swap', 'filter': self.filter_colorswap}
+            {'name': 'Color Swap', 'filter': self.filter_colorswap},
+            {'name': 'Color Scale', 'filter': self.filter_colorscale}
         ]
 
     def __str__(self):
@@ -195,7 +196,7 @@ class FilterPhoto:
         image.putdata(new_data)
         return image
 
-    def filter_warhol(self, text="Base Camp Coding Academy", fontsize=256, size=1024, colors=4, color=(0, 0, 0), padding=24, smooths=6):
+    def filter_warhol(self, size=1024, colors=4, color=(0, 0, 0), padding=24, smooths=6):
         # image properties
         colors = min(256, colors)
         r, g, b = color
@@ -252,7 +253,7 @@ class FilterPhoto:
         image.putdata(data)
         return image
 
-    def filter_colorswap(self, text="Base Camp Coding Academy", fontsize=256, size=1024, color=(0, 0, 0), padding=24):
+    def filter_colorswap(self, size=1024, color=(0, 0, 0), padding=24):
         # image properties
         colors = 256
         r, g, b = color
@@ -298,6 +299,62 @@ class FilterPhoto:
             data.extend(long_pad)
 
         image = Image.new('RGB', (size, height))
+        image.putdata(data)
+        return image
+
+    def save(self):
+        disk.save_image(self)
+
+    def filter_colorscale(self, size=1024, color=(255, 255, 255), padding=16):
+        # image properties
+        colors = 256
+        r, g, b = color
+        color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
+        q_size = (size - (4 * padding)) // 3
+        size = size - (size % (q_size * 3 + padding * 4))
+
+        # load image into memory
+        image = self.image
+        image = resizeimage.resize_cover(
+            image, [q_size, q_size, ], validate=False).convert('RGB')
+        image = image.quantize(colors).convert('RGB')
+
+        # get image data
+        px_data = []
+        # rgb
+        rgb = list(image.getdata())
+        for r in range(3):
+            for g in range(3):
+                for b in range(3):
+                    if ((r + g + b) == 3) and ((r**2 + b**2 + g**2) == 5):
+                        px_data.append(
+                            list(map(lambda t: (t[r], t[g], t[b]), rgb)))
+
+        # r g b only
+        px_data.append(list(map(lambda t: (t[0], 0, 0), rgb)))
+        px_data.append(list(map(lambda t: (0, t[1], 0), rgb)))
+        px_data.append(list(map(lambda t: (0, 0, t[2]), rgb)))
+
+        px_data[3], px_data[7], px_data[6], px_data[2], px_data[5] = px_data[2], px_data[3], px_data[5], px_data[6], px_data[7]
+
+        data = []
+        long_pad = [color for _ in range(size)]
+        short_pad = [color for _ in range(padding)]
+        for r in range(3):
+            for _ in range(padding):
+                data.extend(long_pad)
+            for i in range(0, q_size**2, q_size):
+                data.extend(short_pad)
+                data.extend(px_data[3 * r][i:i + q_size])
+                data.extend(short_pad)
+                data.extend(px_data[3 * r + 1][i:i + q_size])
+                data.extend(short_pad)
+                data.extend(px_data[3 * r + 2][i:i + q_size])
+                data.extend(short_pad)
+        for _ in range(padding):
+            data.extend(long_pad)
+
+        image = Image.new('RGB', (size, size))
         image.putdata(data)
         return image
 
