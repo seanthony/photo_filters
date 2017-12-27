@@ -1,5 +1,22 @@
 from core import FilterPhoto, is_file
 import os
+from time import sleep as zzzz
+
+
+def welcome():
+    zzzz(.2500)
+    print("         _[]_/____\\__n_")
+    zzzz(.2500)
+    print("        |_____.--.__()_|")
+    zzzz(.2500)
+    print("        |S   //# \\\\    |")
+    zzzz(.2500)
+    print("        |T   \\\\__//    |")
+    zzzz(.2500)
+    print("        |A    '--'     |")
+    zzzz(.2500)
+    print("        '--------------'")
+    zzzz(.2500)
 
 
 def clear_screen():
@@ -11,14 +28,14 @@ def clear_screen():
 
 def sys_exit():
     clear_screen()
-    print('thank you for using the software. have a nice day.')
+    print('thank you for using the software. have a nice day. :)')
     exit()
 
 
 def get_filename():
     while True:
         filename = input(
-            'please enter the filename with path of the picture you are filtering: ').strip()
+            'please enter the filename (with path) of the picture you would like to filter: ').strip()
         if filename.lower() == 'q':
             sys_exit()
         elif is_file(filename):
@@ -55,13 +72,15 @@ def get_filter(filter_list):
         elif choice.isnumeric() and int(choice) in range(num_filters):
             return int(choice)
         else:
-            print('whoops. \'{}\' an invalid option.'.format(choice))
+            print('whoops. \'{}\' is an invalid option.'.format(choice))
             continue
 
 
 def main():
     clear_screen()
-    print('hello world.\n\nwelcome to sean\'s photo editor.\nupload a picture of your choice and apply the filter of your choice.\nenter "q" to quit.\n')
+    print('hello world. welcome to sean\'s photo editor.\n')
+    welcome()
+    print('\nupload a picture of your choice and choose a filter.\nenter "q" to quit.\n')
     filename = get_filename()
     image = get_image_file(filename)
     filter_index = get_filter(image.filters)
