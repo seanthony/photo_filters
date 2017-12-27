@@ -2,6 +2,7 @@ import disk
 from math import sqrt
 from PIL import Image, ImageFilter, ImageFont, ImageDraw
 from resizeimage import resizeimage
+from random import randint
 
 
 def is_file(filename):
@@ -19,7 +20,8 @@ class FilterPhoto:
             {'name': 'Square Blocks', 'filter': self.filter_squareblocks},
             {'name': 'Circle Dots', 'filter': self.filter_circledots},
             {'name': 'Black Out Text', 'filter': self.filter_lettertext},
-            {'name': 'Black Out Inverse', 'filter': self.filter_inversetext}
+            {'name': 'Black Out Inverse', 'filter': self.filter_inversetext},
+            {'name': 'Andy Warhol', 'filter': self.filter_warhol}
         ]
 
     def __str__(self):
@@ -34,13 +36,19 @@ class FilterPhoto:
         filename = filename.replace('.', '_filtered.')
         return filename
 
+    def no_filter(self, size=1024):
+        image = self.image
+        image = resizeimage.resize_cover(
+            image, [size, size], validate=False).convert('RGB')
+        return image
+
     def filter_squareblocks(self, size=1024, colors=16, blocks=16, color=(255, 255, 255)):
         # image properties
         colors = min(256, colors)
         size = size - (size % blocks)
         w = size // blocks  # block width
         r, g, b = color
-        color = (min(255, r), min(255, g), min(255, b))
+        color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
 
         # helper functions
         def color_index(i):
@@ -69,7 +77,7 @@ class FilterPhoto:
         # image properties
         colors = min(256, colors)
         r, g, b = color
-        color = (min(255, r), min(255, g), min(255, b))
+        color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
         size = size - (size % circles)
         d = size // circles  # pixel diameter of individual circles
         r = d // 2
@@ -108,7 +116,7 @@ class FilterPhoto:
         # image properties
         colors = min(256, colors)
         r, g, b = color
-        color = (min(255, r), min(255, g), min(255, b))
+        color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
 
         # load image into memory
         image = self.image
@@ -149,7 +157,7 @@ class FilterPhoto:
         # image properties
         colors = min(256, colors)
         r, g, b = color
-        color = (min(255, r), min(255, g), min(255, b))
+        color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
 
         # load image into memory
         image = self.image
@@ -186,10 +194,61 @@ class FilterPhoto:
         image.putdata(new_data)
         return image
 
-    def no_filter(self, size=1024):
+    def filter_warhol(self, text="Base Camp Coding Academy", fontsize=256, size=1024, colors=4, color=(0, 0, 0), padding=24, smooths=6):
+        # image properties
+        colors = min(256, colors)
+        r, g, b = color
+        color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
+        q_size = (size - (3 * padding)) // 2
+        size = size - (size % (q_size * 2 + padding * 3))
+
+        # load image into memory
         image = self.image
         image = resizeimage.resize_cover(
-            image, [size, size], validate=False).convert('RGB')
+            image, [q_size, q_size, ], validate=False).convert('RGB')
+        # smooth image
+        for _ in range(smooths):
+            image = image.filter(ImageFilter.SMOOTH_MORE).convert(
+                'RGB').quantize(colors).convert('RGB')
+
+        # get image data
+        data = list(image.getdata())
+
+        # get colors in picture
+        def sum_tuple(t):
+            r, g, b = t
+            return r + g + b
+
+        def random_color():
+            return (randint(0, 255), randint(0, 255), randint(0, 255))
+
+        colors_in_picture = sorted(list(set(data)), key=sum_tuple)
+        k = str(colors_in_picture[0])
+        warhol = []
+
+        # generate lists of data with new colors
+        for _ in range(4):
+            d = {str(v): random_color() for v in colors_in_picture[1:]}
+            d[k] = (0, 0, 0)
+            warhol.append([d.get(str(px)) for px in data])
+
+        data = []
+        long_pad = [color for _ in range(size)]
+        short_pad = [color for _ in range(padding)]
+        for r in range(2):
+            for _ in range(padding):
+                data.extend(long_pad)
+            for i in range(0, q_size**2, q_size):
+                data.extend(short_pad)
+                data.extend(warhol[2 * r][i:i + q_size])
+                data.extend(short_pad)
+                data.extend(warhol[2 * r + 1][i:i + q_size])
+                data.extend(short_pad)
+        for _ in range(padding):
+            data.extend(long_pad)
+
+        image = Image.new('RGB', (size, size))
+        image.putdata(data)
         return image
 
     def save(self):

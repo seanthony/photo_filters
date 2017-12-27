@@ -4,19 +4,19 @@ from time import sleep as zzzz
 
 
 def welcome():
-    zzzz(.2500)
+    zzzz(.1000)
     print("         _[]_/____\\__n_")
-    zzzz(.2500)
+    zzzz(.1000)
     print("        |_____.--.__()_|")
-    zzzz(.2500)
+    zzzz(.1000)
     print("        |S   //# \\\\    |")
-    zzzz(.2500)
+    zzzz(.1000)
     print("        |T   \\\\__//    |")
-    zzzz(.2500)
+    zzzz(.1000)
     print("        |A    '--'     |")
-    zzzz(.2500)
+    zzzz(.1000)
     print("        '--------------'")
-    zzzz(.2500)
+    zzzz(.1000)
 
 
 def clear_screen():
