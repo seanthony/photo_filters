@@ -23,7 +23,8 @@ class FilterPhoto:
             {'name': 'Black Out Inverse', 'filter': self.filter_inversetext},
             {'name': 'Andy Warhol', 'filter': self.filter_warhol},
             {'name': 'Color Swap', 'filter': self.filter_colorswap},
-            {'name': 'Color Scale', 'filter': self.filter_colorscale}
+            {'name': 'Color Scale', 'filter': self.filter_colorscale},
+            {'name': 'Minimalist', 'filter': self.filter_minimalist}
         ]
 
     def __str__(self):
@@ -46,7 +47,7 @@ class FilterPhoto:
 
     def filter_squareblocks(self, size=1024, colors=16, blocks=16, color=(255, 255, 255)):
         # image properties
-        colors = min(256, colors)
+        colors = max(1, min(256, colors))
         size = size - (size % blocks)
         w = size // blocks  # block width
         r, g, b = color
@@ -77,7 +78,7 @@ class FilterPhoto:
 
     def filter_circledots(self, size=1024, colors=16, circles=16, color=(255, 255, 255)):
         # image properties
-        colors = min(256, colors)
+        colors = max(1, min(256, colors))
         r, g, b = color
         color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
         size = size - (size % circles)
@@ -116,7 +117,7 @@ class FilterPhoto:
 
     def filter_lettertext(self, text="Base Camp Coding Academy", fontsize=256, size=1024, colors=256, color=(255, 255, 255), padding=64):
         # image properties
-        colors = min(256, colors)
+        colors = max(1, min(256, colors))
         r, g, b = color
         color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
 
@@ -157,7 +158,7 @@ class FilterPhoto:
 
     def filter_inversetext(self, text="Base Camp Coding Academy", fontsize=256, size=1024, colors=256, color=(255, 255, 255), padding=64):
         # image properties
-        colors = min(256, colors)
+        colors = max(1, min(256, colors))
         r, g, b = color
         color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
 
@@ -196,9 +197,9 @@ class FilterPhoto:
         image.putdata(new_data)
         return image
 
-    def filter_warhol(self, size=1024, colors=4, color=(0, 0, 0), padding=24, smooths=6):
+    def filter_warhol(self, size=1024, colors=4, color=(0, 0, 0), padding=24, smooths=8):
         # image properties
-        colors = min(256, colors)
+        colors = max(1, min(256, colors))
         r, g, b = color
         color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
         q_size = (size - (3 * padding)) // 2
@@ -302,9 +303,6 @@ class FilterPhoto:
         image.putdata(data)
         return image
 
-    def save(self):
-        disk.save_image(self)
-
     def filter_colorscale(self, size=1024, color=(255, 255, 255), padding=16):
         # image properties
         colors = 256
@@ -316,7 +314,7 @@ class FilterPhoto:
         # load image into memory
         image = self.image
         image = resizeimage.resize_cover(
-            image, [q_size, q_size, ], validate=False).convert('RGB')
+            image, [q_size, q_size], validate=False).convert('RGB')
         image = image.quantize(colors).convert('RGB')
 
         # get image data
@@ -352,6 +350,40 @@ class FilterPhoto:
                 data.extend(px_data[3 * r + 2][i:i + q_size])
                 data.extend(short_pad)
         for _ in range(padding):
+            data.extend(long_pad)
+
+        image = Image.new('RGB', (size, size))
+        image.putdata(data)
+        return image
+
+    def filter_minimalist(self, size=1024, colors=4, color=(255, 255, 255), padding=128):
+        # image properties
+        colors = max(1, min(256, colors))
+        r, g, b = color
+        color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
+        height = (size - ((colors + 1) * padding)) // colors
+        size = size - (size % ((height * colors) + (colors + 1) * padding))
+        width = size - (2 * padding)
+
+        # load image into memory
+        image = self.image
+        image = resizeimage.resize_cover(
+            image, [size, size], validate=False).convert('RGB')
+        image = image.quantize(colors).convert('RGB')
+
+        # get image data
+        colors_in_picture = list(set(list(image.getdata())))
+
+        # padding data sets
+        long_pad = [color for _ in range(padding * size)]
+        short_pad = [color for _ in range(padding)]
+
+        data = long_pad[:]
+        for unique_color in colors_in_picture:
+            for i in range(height):
+                data.extend(short_pad)
+                data.extend([unique_color for _ in range(width)])
+                data.extend(short_pad)
             data.extend(long_pad)
 
         image = Image.new('RGB', (size, size))
