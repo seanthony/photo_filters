@@ -2,7 +2,7 @@ import disk
 from math import sqrt
 from PIL import Image, ImageFilter, ImageFont, ImageDraw
 from resizeimage import resizeimage
-from random import randint
+from random import randint, choice
 
 
 def is_file(filename):
@@ -24,7 +24,8 @@ class FilterPhoto:
             {'name': 'Andy Warhol', 'filter': self.filter_warhol},
             {'name': 'Color Swap', 'filter': self.filter_colorswap},
             {'name': 'Color Scale', 'filter': self.filter_colorscale},
-            {'name': 'Minimalist', 'filter': self.filter_minimalist}
+            {'name': 'Minimalist', 'filter': self.filter_minimalist},
+            {'name': 'Minimalist Wave', 'filter': self.filter_minimalistwave}
         ]
 
     def __str__(self):
@@ -385,6 +386,42 @@ class FilterPhoto:
                 data.extend([unique_color for _ in range(width)])
                 data.extend(short_pad)
             data.extend(long_pad)
+
+        image = Image.new('RGB', (size, size))
+        image.putdata(data)
+        return image
+
+    def filter_minimalistwave(self, size=1024, color=(255, 255, 255), padding=32, jump=1, step=1):
+        # image properties
+        colors = 2
+        r, g, b = color
+        color = (max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b)))
+        size = size - ((size - (2 * padding)) % step)
+        inner = size - (2 * padding)
+
+        # load image into memory
+        image = self.image
+        image = resizeimage.resize_cover(
+            image, [size, size], validate=False).convert('RGB')
+        image = image.quantize(colors).convert('RGB')
+
+        # get image data
+        color_a, color_b = tuple(set(list(image.getdata())))
+
+        # padding data sets
+        long_pad = [color for _ in range(padding * size)]
+        short_pad = [color for _ in range(padding)]
+
+        c = inner // 2
+        data = long_pad[:]
+        for a in range(0, inner, step):
+            for b in range(step):
+                data.extend(short_pad)
+                data.extend([color_a for _ in range(c)])
+                data.extend([color_b for _ in range(c, inner)])
+                data.extend(short_pad)
+            c = min(inner, max(c + choice([-jump, 0, jump]), 0))
+        data.extend(long_pad)
 
         image = Image.new('RGB', (size, size))
         image.putdata(data)
